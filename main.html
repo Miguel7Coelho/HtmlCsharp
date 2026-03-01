@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# .NET & Cybersecurity</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #171717;
+    --border: #262626;
+    --faint: #404040;
+    --text: #e5e5e5;
+    --muted: #737373;
+    --accent: #3b82f6;
+    --green: #22c55e;
+    --orange: #f97316;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* HEADER */
+  header { padding: 56px 0 40px; border-bottom: 1px solid var(--border); }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 13px; font-weight: 300; margin-top: 6px; max-width: 480px; }
+  .stats { display: flex; gap: 28px; margin-top: 24px; flex-wrap: wrap; }
+  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 500; }
+  .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* PROGRESS */
+  .progress-bar-wrap { padding: 20px 0; border-bottom: 1px solid var(--border); }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 8px;
+  }
+  .bar-track { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; }
+
+  /* NAV */
+  nav { display: flex; margin: 24px 0 28px; border-bottom: 1px solid var(--border); }
+  .nav-btn {
+    padding: 8px 14px;
+    background: transparent; border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; margin-bottom: -1px;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  /* PHASE BANNER */
+  .phase-banner {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 20px 0 16px;
+  }
+  .phase-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+  .phase-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .phase-weeks { font-size: 12px; color: var(--muted); margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+
+  /* WEEK ROWS */
+  .week-list { display: flex; flex-direction: column; margin-bottom: 40px; }
+  .week-row { border-top: 1px solid var(--border); }
+  .week-row:last-child { border-bottom: 1px solid var(--border); }
+
+  .week-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 0; cursor: pointer; user-select: none;
+  }
+
+  .check-box {
+    width: 17px; height: 17px;
+    border: 1.5px solid var(--faint); border-radius: 3px;
+    background: transparent; flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .check-box svg { display: none; width: 9px; height: 9px; }
+  .week-row.done .check-box { background: var(--green); border-color: var(--green); }
+  .week-row.done .check-box svg { display: block; }
+
+  .week-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--muted); letter-spacing: 0.08em; min-width: 62px; flex-shrink: 0;
+  }
+  .week-title-text {
+    font-size: 14px; font-weight: 500; color: #d4d4d4; flex: 1; transition: color 0.15s;
+  }
+  .week-header:hover .week-title-text { color: var(--text); }
+  .week-row.done .week-title-text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--faint); }
+
+  .expand-icon { color: var(--faint); font-size: 11px; transition: transform 0.2s; flex-shrink: 0; }
+  .week-row.open .expand-icon { transform: rotate(90deg); }
+
+  /* EXPANDED BODY */
+  .week-body { display: none; padding: 2px 0 18px 29px; }
+  .week-row.open .week-body { display: block; }
+
+  .topics-list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .topics-list li { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
+  .topics-list li::before { content: '—'; color: var(--faint); flex-shrink: 0; font-size: 12px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 2px 7px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted);
+  }
+  .tag.free { color: var(--green); border-color: rgba(34,197,94,0.2); background: rgba(34,197,94,0.04); }
+  .tag.project { color: var(--orange); border-color: rgba(249,115,22,0.2); background: rgba(249,115,22,0.04); }
+
+  /* ROADMAP */
+  .roadmap { display: flex; flex-direction: column; }
+  .rm-item { display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .rm-item:first-child { border-top: 1px solid var(--border); }
+  .rm-left { min-width: 80px; flex-shrink: 0; }
+  .rm-phase-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; }
+  .rm-dur { font-size: 12px; color: var(--faint); margin-top: 2px; }
+  .rm-title { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .rm-desc { font-size: 13px; color: var(--muted); }
+
+  .routine-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border); margin-top: 28px;
+  }
+  .routine-cell { background: var(--bg); padding: 16px; }
+  .routine-day { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 6px; }
+  .routine-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .routine-desc { font-size: 12px; color: var(--muted); }
+
+  /* TOOLS */
+  .tools-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 36px;
+  }
+  .tool-item { background: var(--bg); padding: 14px 16px; display: flex; gap: 10px; }
+  .tool-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .tool-name { font-size: 13px; font-weight: 500; }
+  .tool-desc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .books-list { display: flex; flex-direction: column; }
+  .book-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
+  .book-item:first-child { border-top: 1px solid var(--border); }
+  .book-name { font-size: 13px; font-weight: 500; }
+  .book-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted);
+    letter-spacing: 0.12em; text-transform: uppercase; margin: 28px 0 14px;
+  }
+
+  .phase-content { display: none; }
+  .phase-content.active { display: block; }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 20px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--faint); letter-spacing: 0.1em; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="eyebrow">Study Program · Beginner Track</div>
+    <h1>C# .NET & <em>Cybersecurity</em></h1>
+    <p class="subtitle">6 months. 4 phases. From zero to secure .NET developer.</p>
+    <div class="stats">
+      <div><div class="stat-val">24</div><div class="stat-lbl">Weeks</div></div>
+      <div><div class="stat-val">4</div><div class="stat-lbl">Phases</div></div>
+      <div><div class="stat-val" id="done-count">0</div><div class="stat-lbl">Completed</div></div>
+    </div>
+  </header>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-meta">
+      <span>Progress</span>
+      <span id="pct-label">0 / 24</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+  </div>
+
+  <nav>
+    <button class="nav-btn active" data-phase="1" onclick="switchPhase(1)">Phase 1</button>
+    <button class="nav-btn" data-phase="2" onclick="switchPhase(2)">Phase 2</button>
+    <button class="nav-btn" data-phase="3" onclick="switchPhase(3)">Phase 3</button>
+    <button class="nav-btn" data-phase="4" onclick="switchPhase(4)">Phase 4</button>
+    <button class="nav-btn" data-phase="5" onclick="switchPhase(5)">Roadmap</button>
+    <button class="nav-btn" data-phase="6" onclick="switchPhase(6)">Tools</button>
+  </nav>
+
+  <!-- PHASE 1 -->
+  <div class="phase-content active" id="phase-1">
+    <div class="phase-banner">
+      <span class="phase-num">01 / 04</span>
+      <span class="phase-name">C# Foundations</span>
+      <span class="phase-weeks">Weeks 1–6</span>
+    </div>
+    <div class="week-list">
+      <div class="week-row" data-id="1-1">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 01</span>
+          <span class="week-title-text">C# Environment Setup</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Install Visual Studio / VS Code and the .NET SDK</li>
+            <li>Create your first Console App ("Hello, World")</li>
+            <li>Understand solution structure: .sln and .csproj files</li>
+            <li>Basic C# syntax — semicolons, namespaces, using directives</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Learn</span><span class="tag free">FREE: dotnet.microsoft.com</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="1-2">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 02</span>
+          <span class="week-title-text">Variables & Data Types</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>int, string, bool, double, char, decimal</li>
+            <li>Value types vs reference types</li>
+            <li>Type inference with var</li>
+            <li>Console input/output and string interpolation ($"")</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Learn</span><span class="tag project">PROJECT: Calculator CLI</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="1-3">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 03</span>
+          <span class="week-title-text">Control Flow</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>if / else if / else, switch statements</li>
+            <li>for, while, do-while, foreach loops</li>
+            <li>break, continue, return</li>
+            <li>Logical operators: &&, ||, !</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Exercism.io C# track</span><span class="tag project">PROJECT: Number Guessing Game</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="1-4">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 04</span>
+          <span class="week-title-text">Methods & Functions</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Defining and calling methods, return types, void</li>
+            <li>Parameters and method overloading</li>
+            <li>Optional parameters and named arguments</li>
+            <li>Scope and the call stack basics</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Docs</span><span class="tag project">PROJECT: Unit Converter Tool</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="1-5">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 05</span>
+          <span class="week-title-text">Collections & LINQ</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Arrays (1D and 2D)</li>
+            <li>List&lt;T&gt;, Dictionary&lt;K,V&gt;, HashSet&lt;T&gt;</li>
+            <li>LINQ basics: Where, Select, FirstOrDefault, OrderBy</li>
+            <li>Iterating and transforming collections</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Exercism.io</span><span class="tag project">PROJECT: Grade Tracker</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="1-6">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 06</span>
+          <span class="week-title-text">Error Handling & File I/O</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>try / catch / finally blocks</li>
+            <li>Custom exception types</li>
+            <li>File I/O: File.ReadAllText, StreamWriter, StreamReader</li>
+            <li>Debugging in Visual Studio — breakpoints and watch windows</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Docs</span><span class="tag project">PROJECT: File-based To-Do CLI</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase-content" id="phase-2">
+    <div class="phase-banner">
+      <span class="phase-num">02 / 04</span>
+      <span class="phase-name">.NET & Object-Oriented Programming</span>
+      <span class="phase-weeks">Weeks 7–14</span>
+    </div>
+    <div class="week-list">
+      <div class="week-row" data-id="2-1">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 07</span>
+          <span class="week-title-text">Classes & Objects</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Classes, constructors, properties (get/set)</li>
+            <li>Encapsulation: public / private / protected</li>
+            <li>Static vs instance members</li>
+            <li>The this keyword and object initializers</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Learn</span><span class="tag project">PROJECT: Bank Account Class</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="2-2">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 08</span>
+          <span class="week-title-text">Inheritance & Polymorphism</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Base and derived classes, the base keyword</li>
+            <li>Virtual and override methods</li>
+            <li>Abstract classes vs interfaces</li>
+            <li>Introduction to SOLID principles</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: tutorialspoint</span><span class="tag project">PROJECT: Animal Hierarchy</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="2-3">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 09</span>
+          <span class="week-title-text">Async & Tasks</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>async / await pattern explained</li>
+            <li>Task and Task&lt;T&gt;, Task.Run</li>
+            <li>CancellationToken usage</li>
+            <li>Common async pitfalls and deadlocks</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Docs — async</span><span class="tag project">PROJECT: Async File Downloader</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="2-4">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 10</span>
+          <span class="week-title-text">ASP.NET Core Basics</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Create a Web API project from scratch</li>
+            <li>Controllers, routes, HTTP verbs (GET, POST, PUT, DELETE)</li>
+            <li>Middleware pipeline and how requests flow through it</li>
+            <li>appsettings.json configuration</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Learn — ASP.NET</span><span class="tag project">PROJECT: Simple REST API</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="2-5">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 11</span>
+          <span class="week-title-text">Entity Framework Core</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Code-First approach and migrations</li>
+            <li>DbContext and DbSet configuration</li>
+            <li>CRUD operations via EF Core</li>
+            <li>SQLite for development, SQL Server for production</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: EF Core docs</span><span class="tag project">PROJECT: Users CRUD API</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="2-6">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 12</span>
+          <span class="week-title-text">Dependency Injection & Unit Testing</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>IServiceCollection and DI patterns in ASP.NET Core</li>
+            <li>Unit testing with xUnit or NUnit</li>
+            <li>Mocking dependencies with Moq</li>
+            <li>Introduction to Test-Driven Development (TDD)</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Docs</span><span class="tag project">PROJECT: Tested Service Layer</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="2-7">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 13–14</span>
+          <span class="week-title-text">Authentication — ASP.NET Identity & JWT</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Set up ASP.NET Core Identity</li>
+            <li>JWT Bearer token generation and validation</li>
+            <li>Role-based and policy-based authorization</li>
+            <li>Secure password hashing (PBKDF2 under the hood)</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Learn</span><span class="tag project">PROJECT: Auth API with JWT</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 3 -->
+  <div class="phase-content" id="phase-3">
+    <div class="phase-banner">
+      <span class="phase-num">03 / 04</span>
+      <span class="phase-name">Cybersecurity Core</span>
+      <span class="phase-weeks">Weeks 15–20</span>
+    </div>
+    <div class="week-list">
+      <div class="week-row" data-id="3-1">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 15</span>
+          <span class="week-title-text">Security Fundamentals</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>CIA Triad: Confidentiality, Integrity, Availability</li>
+            <li>OWASP Top 10 — overview of each category</li>
+            <li>Threat modeling basics with STRIDE</li>
+            <li>Common attack types: MITM, phishing, SQLi, brute force</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: OWASP.org</span><span class="tag free">FREE: TryHackMe — Intro rooms</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="3-2">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 16</span>
+          <span class="week-title-text">Cryptography in .NET</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Symmetric encryption: AES in C# (System.Security.Cryptography)</li>
+            <li>Asymmetric encryption: RSA key pairs</li>
+            <li>Hashing: SHA-256 and PBKDF2 for passwords</li>
+            <li>When to use each — a practical mental model</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Docs — Cryptography</span><span class="tag project">PROJECT: Encryption Utility CLI</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="3-3">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 17</span>
+          <span class="week-title-text">Web Vulnerabilities & Defenses</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>SQL Injection — how it works and parameterized queries in EF</li>
+            <li>Cross-Site Scripting (XSS) — types and output encoding</li>
+            <li>CSRF attacks — tokens and SameSite cookie attribute</li>
+            <li>Security headers in ASP.NET Core (HSTS, CSP, X-Frame-Options)</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: OWASP WebGoat</span><span class="tag free">FREE: PortSwigger Web Security Academy</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="3-4">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 18</span>
+          <span class="week-title-text">Network Security</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>TCP/IP, DNS, HTTP/S fundamentals</li>
+            <li>TLS/SSL: certificates, handshake, and HTTPS in ASP.NET</li>
+            <li>Firewalls, VPNs, and reverse proxies</li>
+            <li>Packet analysis with Wireshark — hands-on exercise</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: TryHackMe — Network rooms</span><span class="tag free">FREE: Wireshark Docs</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="3-5">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 19</span>
+          <span class="week-title-text">Secure Coding in C#</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Input validation and sanitization patterns in C#</li>
+            <li>Principle of least privilege in code design</li>
+            <li>Secrets management — avoid hardcoding, use env vars or vaults</li>
+            <li>Security code review checklist walkthrough</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: OWASP Cheat Sheet Series</span><span class="tag project">PROJECT: Audit your Phase 2 API</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="3-6">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 20</span>
+          <span class="week-title-text">Penetration Testing Intro</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Reconnaissance: nmap scanning and directory busting</li>
+            <li>Burp Suite basics: intercept, repeater, and scanner</li>
+            <li>CTF challenges on TryHackMe and Hack The Box Starting Point</li>
+            <li>Ethical hacking, legal scope, and responsible disclosure</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: TryHackMe</span><span class="tag free">FREE: Hack The Box — Starting Point</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE 4 -->
+  <div class="phase-content" id="phase-4">
+    <div class="phase-banner">
+      <span class="phase-num">04 / 04</span>
+      <span class="phase-name">Integration & Capstone</span>
+      <span class="phase-weeks">Weeks 21–24</span>
+    </div>
+    <div class="week-list">
+      <div class="week-row" data-id="4-1">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 21</span>
+          <span class="week-title-text">Secure API Design</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Rate limiting and throttling in ASP.NET Core</li>
+            <li>OAuth 2.0 and OpenID Connect concepts</li>
+            <li>API key management and scoping</li>
+            <li>Structured logging with Serilog and monitoring basics</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: Microsoft Learn</span><span class="tag project">PROJECT: Harden your Phase 2 API</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="4-2">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 22</span>
+          <span class="week-title-text">DevSecOps & CI/CD</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>GitHub Actions workflows for .NET build and test</li>
+            <li>Static analysis (SAST) with SonarCloud or GitHub CodeQL</li>
+            <li>Dependency scanning with Dependabot</li>
+            <li>Docker basics — containerize your ASP.NET Core app</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: GitHub Docs</span><span class="tag free">FREE: SonarCloud free tier</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="4-3">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 23</span>
+          <span class="week-title-text">Capstone — Secure Password Manager API</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>ASP.NET Core + EF Core + SQLite backend</li>
+            <li>AES-256 encrypted credential storage</li>
+            <li>JWT auth with role-based access control</li>
+            <li>Full OWASP Top 10 hardening checklist applied</li>
+          </ul>
+          <div class="tags"><span class="tag project">PROJECT: Capstone Build</span></div>
+        </div>
+      </div>
+      <div class="week-row" data-id="4-4">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="check-box" onclick="toggleDone(event,this)"><svg viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg></div>
+          <span class="week-label">WEEK 24</span>
+          <span class="week-title-text">Portfolio & Next Steps</span>
+          <span class="expand-icon">▶</span>
+        </div>
+        <div class="week-body">
+          <ul class="topics-list">
+            <li>Document all projects with clean READMEs on GitHub</li>
+            <li>Write a technical blog post about your capstone</li>
+            <li>Target certifications: CompTIA Security+, Microsoft AZ-900</li>
+            <li>Next track: SC-100 (Azure Security), OSCP, or senior .NET path</li>
+          </ul>
+          <div class="tags"><span class="tag free">FREE: GitHub Pages for portfolio</span><span class="tag free">FREE: Microsoft Learn cert paths</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="phase-content" id="phase-5">
+    <div class="section-label" style="margin-top:8px;">Full Timeline</div>
+    <div class="roadmap">
+      <div class="rm-item">
+        <div class="rm-left"><div class="rm-phase-tag">PHASE 01</div><div class="rm-dur">Wks 1–6</div></div>
+        <div><div class="rm-title">C# Foundations</div><div class="rm-desc">Syntax, data types, control flow, methods, collections, error handling. ~8 hrs/week.</div></div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-left"><div class="rm-phase-tag">PHASE 02</div><div class="rm-dur">Wks 7–14</div></div>
+        <div><div class="rm-title">.NET & OOP</div><div class="rm-desc">OOP, async, ASP.NET Core, Entity Framework, testing, JWT auth. ~10 hrs/week.</div></div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-left"><div class="rm-phase-tag">PHASE 03</div><div class="rm-dur">Wks 15–20</div></div>
+        <div><div class="rm-title">Cybersecurity Core</div><div class="rm-desc">OWASP, cryptography in C#, web vulns, network security, pentest intro. ~10 hrs/week.</div></div>
+      </div>
+      <div class="rm-item">
+        <div class="rm-left"><div class="rm-phase-tag">PHASE 04</div><div class="rm-dur">Wks 21–24</div></div>
+        <div><div class="rm-title">Integration & Capstone</div><div class="rm-desc">Secure API design, DevSecOps, capstone build, portfolio and certifications. ~12 hrs/week.</div></div>
+      </div>
+    </div>
+
+    <div class="section-label">Suggested Weekly Routine</div>
+    <div class="routine-grid">
+      <div class="routine-cell">
+        <div class="routine-day">MON · WED · FRI</div>
+        <div class="routine-title">Theory & Reading</div>
+        <div class="routine-desc">60–90 min on docs, tutorials and videos for the week's topic</div>
+      </div>
+      <div class="routine-cell">
+        <div class="routine-day">TUE · THU</div>
+        <div class="routine-title">Coding Practice</div>
+        <div class="routine-desc">60–90 min on Exercism exercises or small experiments</div>
+      </div>
+      <div class="routine-cell">
+        <div class="routine-day">WEEKEND</div>
+        <div class="routine-title">Build the Project</div>
+        <div class="routine-desc">3–4 hrs applying everything learned into the week's project</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="phase-content" id="phase-6">
+    <div class="section-label" style="margin-top:8px;">Essential Tools</div>
+    <div class="tools-grid">
+      <div class="tool-item"><div class="tool-icon">🧑‍💻</div><div><div class="tool-name">Visual Studio 2022</div><div class="tool-desc">Main IDE — Community edition is free</div></div></div>
+      <div class="tool-item"><div class="tool-icon">📝</div><div><div class="tool-name">VS Code + C# Dev Kit</div><div class="tool-desc">Lightweight alternative for smaller projects</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🎓</div><div><div class="tool-name">Microsoft Learn</div><div class="tool-desc">Free, structured C# and .NET paths</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🏋️</div><div><div class="tool-name">Exercism.io</div><div class="tool-desc">C# track with mentored exercises</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🔐</div><div><div class="tool-name">TryHackMe</div><div class="tool-desc">Gamified cybersecurity learning rooms</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🕷️</div><div><div class="tool-name">PortSwigger Academy</div><div class="tool-desc">Free web security labs — OWASP Top 10</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🌐</div><div><div class="tool-name">Burp Suite Community</div><div class="tool-desc">Web proxy and vulnerability scanner</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🐳</div><div><div class="tool-name">Docker Desktop</div><div class="tool-desc">Containerize .NET apps for deployment</div></div></div>
+      <div class="tool-item"><div class="tool-icon">📊</div><div><div class="tool-name">SonarCloud</div><div class="tool-desc">Free SAST for open-source projects</div></div></div>
+      <div class="tool-item"><div class="tool-icon">📡</div><div><div class="tool-name">Wireshark</div><div class="tool-desc">Network protocol and traffic analyzer</div></div></div>
+      <div class="tool-item"><div class="tool-icon">📚</div><div><div class="tool-name">OWASP.org</div><div class="tool-desc">Security standards and cheat sheets</div></div></div>
+      <div class="tool-item"><div class="tool-icon">🏆</div><div><div class="tool-name">Hack The Box</div><div class="tool-desc">CTF challenges when you're ready</div></div></div>
+    </div>
+
+    <div class="section-label">Suggested Reading</div>
+    <div class="books-list">
+      <div class="book-item"><div style="font-size:18px;flex-shrink:0;margin-top:2px;">📗</div><div><div class="book-name">C# in Depth — Jon Skeet</div><div class="book-desc">The definitive deep-dive into C#, from fundamentals to advanced features.</div></div></div>
+      <div class="book-item"><div style="font-size:18px;flex-shrink:0;margin-top:2px;">📘</div><div><div class="book-name">The Web Application Hacker's Handbook — Stuttard & Pinto</div><div class="book-desc">Classic reference for understanding web vulnerabilities hands-on.</div></div></div>
+      <div class="book-item"><div style="font-size:18px;flex-shrink:0;margin-top:2px;">📙</div><div><div class="book-name">Cryptography and Network Security — William Stallings</div><div class="book-desc">Solid theoretical grounding in cryptography and protocols.</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">C# · .NET · Cybersecurity — Beginner Study Program</div>
+</footer>
+
+<script>
+  const TOTAL = 24;
+  let done = new Set();
+  try { done = new Set(JSON.parse(localStorage.getItem('study_done') || '[]')); } catch(e){}
+
+  function save() {
+    try { localStorage.setItem('study_done', JSON.stringify([...done])); } catch(e){}
+  }
+
+  function updateProgress() {
+    const n = done.size;
+    document.getElementById('done-count').textContent = n;
+    document.getElementById('pct-label').textContent = n + ' / ' + TOTAL;
+    document.getElementById('bar-fill').style.width = Math.round(n / TOTAL * 100) + '%';
+  }
+
+  function toggleCard(header) {
+    const row = header.closest('.week-row');
+    row.classList.toggle('open');
+  }
+
+  function toggleDone(e, box) {
+    e.stopPropagation();
+    const row = box.closest('.week-row');
+    const id = row.dataset.id;
+    if (done.has(id)) { done.delete(id); row.classList.remove('done'); }
+    else { done.add(id); row.classList.add('done'); }
+    save(); updateProgress();
+  }
+
+  function switchPhase(n) {
+    document.querySelectorAll('.phase-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('phase-' + n).classList.add('active');
+    document.querySelector('.nav-btn[data-phase="' + n + '"]').classList.add('active');
+  }
+
+  document.querySelectorAll('.week-row').forEach(row => {
+    if (done.has(row.dataset.id)) row.classList.add('done');
+  });
+  updateProgress();
+</script>
+</body>
+</html>
